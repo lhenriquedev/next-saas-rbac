@@ -1,3 +1,4 @@
+import { env } from '@saas/env'
 import axios from 'axios'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
@@ -28,10 +29,9 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
     async (request, reply) => {
       const { code } = request.body
 
-      const CLIENT_ID =
-        '1020175485053-phvp7s9pd64otdlh419rfhsd0a15pf06.apps.googleusercontent.com'
-      const CLIENT_SECRET = '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'
-      const REDIRECT_URI = 'http://localhost:3000/auth/api/callback'
+      const CLIENT_ID = env.GOOGLE_OAUTH_CLIENT_ID
+      const CLIENT_SECRET = env.GOOGLE_OAUTH_CLIENT_SECRET
+      const REDIRECT_URI = env.GOOGLE_OAUTH_CLIENT_REDIRECT_URI
 
       const payload = {
         client_id: CLIENT_ID,
