@@ -1,22 +1,59 @@
 import fastifyCORS from '@fastify/cors'
+import fastifyJwt from '@fastify/jwt'
+import fastifySwagger from '@fastify/swagger'
+import fastifySwaggerUi from '@fastify/swagger-ui'
 import { fastify } from 'fastify'
 import {
-  // jsonSchemaTransform,
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 
+import { errorHandler } from './error-handler'
+import { authenticateWithGithub } from './routes/auth/authenticate-with-github'
+import { authenticateWithGoogle } from './routes/auth/authenticate-with-google'
+import { authenticateWithPassword } from './routes/auth/authenticate-with-password'
 import { createAccount } from './routes/auth/create-account'
+import { getProfile } from './routes/auth/get-profile'
+import { requestPasswordRecover } from './routes/auth/request-password-recover'
+import { resetPassword } from './routes/auth/reset-password'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
+app.setErrorHandler(errorHandler)
+
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Next.js SaaS',
+      description: 'Full stack SaaS app with multi-tenanct & RBAC',
+      version: '1.0.0',
+    },
+    servers: [],
+  },
+  transform: jsonSchemaTransform,
+})
+
+app.register(fastifySwaggerUi, {
+  routePrefix: '/docs',
+})
+
+app.register(fastifyJwt, {
+  secret: 'my-jwt-secret',
+})
 
 app.register(fastifyCORS)
 
 app.register(createAccount)
+app.register(authenticateWithPassword)
+app.register(getProfile)
+app.register(requestPasswordRecover)
+app.register(resetPassword)
+app.register(authenticateWithGithub)
+app.register(authenticateWithGoogle)
 
 app.listen({ port: 3333 }).then(() => {
   console.log('HTTP Server running on http://localhost:3333')
