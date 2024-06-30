@@ -42,14 +42,11 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
       }
 
       // refatorar para o axios
-      const googleAuthTokenResponse = await fetch(
-        'https://accounts.google.com/o/oauth2/token',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(payload),
-        },
-      )
+      const googleAuthTokenResponse = await fetch('https://accounts.google.com/o/oauth2/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(payload),
+      })
 
       const googleAuthTokenData = await googleAuthTokenResponse.json()
 
@@ -60,19 +57,14 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
         })
         .parse(googleAuthTokenData)
 
-      const { data: profile } = await axios.get(
-        'https://www.googleapis.com/oauth2/v1/userinfo',
-        {
-          headers: {
-            Authorization: `Bearer ${googleAccessToken}`,
-          },
+      const { data: profile } = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+        headers: {
+          Authorization: `Bearer ${googleAccessToken}`,
         },
-      )
+      })
 
       if (profile.email === null) {
-        throw new BadRequestError(
-          'Your Google account have an email to authenticate',
-        )
+        throw new BadRequestError('Your Google account have an email to authenticate')
       }
 
       let user = await prisma.user.findUnique({
@@ -108,10 +100,7 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
         })
       }
 
-      const token = await reply.jwtSign(
-        { sub: user.id },
-        { sign: { expiresIn: '7d' } },
-      )
+      const token = await reply.jwtSign({ sub: user.id }, { sign: { expiresIn: '7d' } })
 
       return reply.status(201).send({ token })
     },

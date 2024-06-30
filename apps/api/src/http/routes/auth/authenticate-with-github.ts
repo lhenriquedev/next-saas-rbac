@@ -28,19 +28,11 @@ export async function authenticateWithGithub(app: FastifyInstance) {
     async (request, reply) => {
       const { code } = request.body
 
-      const githubOAuthURL = new URL(
-        'https://github.com/login/oauth/access_token',
-      )
+      const githubOAuthURL = new URL('https://github.com/login/oauth/access_token')
 
       githubOAuthURL.searchParams.set('client_id', env.GITHUB_OAUTH_CLIENT_ID)
-      githubOAuthURL.searchParams.set(
-        'client_secret',
-        env.GITHUB_OAUTH_CLIENT_SECRET,
-      )
-      githubOAuthURL.searchParams.set(
-        'redirect_uri',
-        env.GITHUB_OAUTH_CLIENT_SECRET,
-      )
+      githubOAuthURL.searchParams.set('client_secret', env.GITHUB_OAUTH_CLIENT_SECRET)
+      githubOAuthURL.searchParams.set('redirect_uri', env.GITHUB_OAUTH_CLIENT_SECRET)
       githubOAuthURL.searchParams.set('code', code)
 
       const githubAccessTokenResponse = await fetch(githubOAuthURL, {
@@ -82,9 +74,7 @@ export async function authenticateWithGithub(app: FastifyInstance) {
         .parse(githubUserData)
 
       if (email === null) {
-        throw new BadRequestError(
-          'Your Github account have an email to authenticate',
-        )
+        throw new BadRequestError('Your Github account have an email to authenticate')
       }
 
       let user = await prisma.user.findUnique({
@@ -120,10 +110,7 @@ export async function authenticateWithGithub(app: FastifyInstance) {
         })
       }
 
-      const token = await reply.jwtSign(
-        { sub: user.id },
-        { sign: { expiresIn: '7d' } },
-      )
+      const token = await reply.jwtSign({ sub: user.id }, { sign: { expiresIn: '7d' } })
 
       return reply.status(201).send({ token })
     },

@@ -36,14 +36,9 @@ export async function createOrganization(app: FastifyInstance) {
         const { name, domain, shouldAttachUsersByDomain } = request.body
 
         if (domain) {
-          const organizationByDomain = await prisma.organization.findUnique({
-            where: { domain },
-          })
+          const organizationByDomain = await prisma.organization.findUnique({ where: { domain } })
 
-          if (organizationByDomain)
-            throw new BadRequestError(
-              'Another organization with same domain already exists',
-            )
+          if (organizationByDomain) throw new BadRequestError('Another organization with same domain already exists')
         }
 
         const organization = await prisma.organization.create({
@@ -62,9 +57,7 @@ export async function createOrganization(app: FastifyInstance) {
           },
         })
 
-        return reply.status(201).send({
-          organizationId: organization.id,
-        })
+        return reply.status(201).send({ organizationId: organization.id })
       },
     )
 }
